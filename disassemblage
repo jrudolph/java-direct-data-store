@@ -52,7 +52,7 @@
 disassemble 0x00007f0f64a8d4c0
 Dump of assembler code for function _ZN7oopDesc16size_given_klassEP5Klass:
    0x00007f0f64a8d4c0 <+0>:	push   %rbp
-   0x00007f0f64a8d4c1 <+1>:	mov    0x8(%rsi),%eax
+   0x00007f0f64a8d4c1 <+1>:	mov    0x8(%rsi),%eax       <-- rsi contains this
    0x00007f0f64a8d4c4 <+4>:	mov    %rsi,%rdx
    0x00007f0f64a8d4c7 <+7>:	mov    %rsp,%rbp
    0x00007f0f64a8d4ca <+10>:	cmp    $0x0,%eax
@@ -65,9 +65,9 @@ Dump of assembler code for function _ZN7oopDesc16size_given_klassEP5Klass:
    0x00007f0f64a8d4da <+26>:	mov    (%rsi),%rax
    0x00007f0f64a8d4dd <+29>:	mov    %rdi,%rsi
    0x00007f0f64a8d4e0 <+32>:	mov    %rdx,%rdi
-   0x00007f0f64a8d4e3 <+35>:	mov    0xa0(%rax),%rax
-   0x00007f0f64a8d4ea <+42>:	leaveq 
-   0x00007f0f64a8d4eb <+43>:	jmpq   *%rax
+   0x00007f0f64a8d4e3 <+35>:	mov    0xa0(%rax),%rax  <-- vtable entry address
+   0x00007f0f64a8d4ea <+42>:	leaveq                  <-- exit frame
+   0x00007f0f64a8d4eb <+43>:	jmpq   *%rax            <-- tail-call to oop_size
    0x00007f0f64a8d4ed <+45>:	nopl   (%rax)
    0x00007f0f64a8d4f0 <+48>:	mov    0x6c15b1(%rip),%rdx        # 0x7f0f6514eaa8
    0x00007f0f64a8d4f7 <+55>:	mov    %eax,%esi
