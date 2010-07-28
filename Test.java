@@ -5,14 +5,27 @@ public class Test {
 
   public static native Person get();
   public static native Person persist(Person p);
+  public static native Person load(Class<Person> cl);
   
-  public static void main(String[] args) throws InterruptedException {
-    //Thread.sleep(10000);
+  public static void pers() {
     Person p = new Person();
-    p.age = 28;
+    p.age = 12;
     Person copy = persist(p);
-    System.out.println(copy.age);
+    System.out.println(copy.age+" cl: "+copy.getClass());
     System.gc();
     System.out.println(copy.age);
+  }
+  
+  public static void load() {
+    Person copy = load(Person.class);
+    System.out.println(copy.age+" cl: "+copy.getClass());
+    System.gc();
+    System.out.println(copy.age);
+  }
+  
+  public static void main(String[] args) throws InterruptedException {
+    //Thread.sleep(20000);
+    //pers();
+    load();
   }
 }

@@ -1,0 +1,88 @@
+0x7f0f6513d8d0 <_ZTV13instanceKlass+16>:	0x00007f0f648c7460	0x00007f0f64a8d570
+0x7f0f6513d8e0 <_ZTV13instanceKlass+32>:	0x00007f0f64a84300	0x00007f0f64a8d3e0
+0x7f0f6513d8f0 <_ZTV13instanceKlass+48>:	0x00007f0f64a7f5c0	0x00007f0f64a8d440
+0x7f0f6513d900 <_ZTV13instanceKlass+64>:	0x00007f0f64a8d460	0x00007f0f64a84240
+0x7f0f6513d910 <_ZTV13instanceKlass+80>:	0x00007f0f64a82250	0x00007f0f64b996b0
+0x7f0f6513d920 <_ZTV13instanceKlass+96>:	0x00007f0f64a7c390	0x00007f0f64a899e0
+0x7f0f6513d930 <_ZTV13instanceKlass+112>:	0x00007f0f64a86850	0x00007f0f64a8d3c0
+0x7f0f6513d940 <_ZTV13instanceKlass+128>:	0x00007f0f64a8d3b0	0x00007f0f64a83680
+0x7f0f6513d950 <_ZTV13instanceKlass+144>:	0x00007f0f64a7c3c0	0x00007f0f64a88a70
+0x7f0f6513d960 <_ZTV13instanceKlass+160>:	0x00007f0f64a86cf0	0x00007f0f64a8d3d0
+0x7f0f6513d970 <_ZTV13instanceKlass+176>:	0x00007f0f64a8d3f0	0x00007f0f64a8d400
+0x7f0f6513d980 <_ZTV13instanceKlass+192>:	0x00007f0f64a7d620	0x00007f0f64a84a00
+0x7f0f6513d990 <_ZTV13instanceKlass+208>:	0x00007f0f64a7cb90	0x00007f0f64a7d840
+0x7f0f6513d9a0 <_ZTV13instanceKlass+224>:	0x00007f0f64a7fe10	0x00007f0f64a851f0
+0x7f0f6513d9b0 <_ZTV13instanceKlass+240>:	0x00007f0f64a801f0	0x00007f0f64a80070
+0x7f0f6513d9c0 <_ZTV13instanceKlass+256>:	0x00007f0f64a8d430	0x00007f0f648c74b0
+0x7f0f6513d9d0 <_ZTV13instanceKlass+272>:	0x00007f0f648c90e0	0x00007f0f648c74c0
+0x7f0f6513d9e0 <_ZTV13instanceKlass+288>:	0x00007f0f648c74d0	0x00007f0f648c74e0
+0x7f0f6513d9f0 <_ZTV13instanceKlass+304>:	0x00007f0f648c74f0	0x00007f0f648c7500
+0x7f0f6513da00 <_ZTV13instanceKlass+320>:	0x00007f0f648c7510	0x00007f0f648c7520
+0x7f0f6513da10 <_ZTV13instanceKlass+336>:	0x00007f0f648c7530	0x00007f0f648c7540
+0x7f0f6513da20 <_ZTV13instanceKlass+352>:	0x00007f0f648c7550	0x00007f0f648c7560
+0x7f0f6513da30 <_ZTV13instanceKlass+368>:	0x00007f0f648c7570	0x00007f0f648c7580
+0x7f0f6513da40 <_ZTV13instanceKlass+384>:	0x00007f0f648c7590	0x00007f0f648c75a0
+0x7f0f6513da50 <_ZTV13instanceKlass+400>:	0x00007f0f648c75b0	0x00007f0f648c75c0
+0x7f0f6513da60 <_ZTV13instanceKlass+416>:	0x00007f0f64a7d780	0x00007f0f64a8d470
+0x7f0f6513da70 <_ZTV13instanceKlass+432>:	0x00007f0f64a8b9c0	0x00007f0f64a8b860
+0x7f0f6513da80 <_ZTV13instanceKlass+448>:	0x00007f0f64a8d490	0x00007f0f64a89b90
+0x7f0f6513da90 <_ZTV13instanceKlass+464>:	0x00007f0f64a813c0	0x00007f0f64a81150
+0x7f0f6513daa0 <_ZTV13instanceKlass+480>:	0x00007f0f64a81860	0x00007f0f64a815f0
+0x7f0f6513dab0 <_ZTV13instanceKlass+496>:	0x00007f0f64a7c5e0	0x00007f0f64a7c730
+0x7f0f6513dac0 <_ZTV13instanceKlass+512>:	0x00007f0f64a8d140	0x00007f0f64a85b40
+0x7f0f6513dad0 <_ZTV13instanceKlass+528>:	0x00007f0f64a8d280	0x00007f0f64a8b6a0
+0x7f0f6513dae0 <_ZTV13instanceKlass+544>:	0x00007f0f64a7e960	0x00007f0f64a8b4a0
+0x7f0f6513daf0 <_ZTV13instanceKlass+560>:	0x00007f0f64a7e700	0x00007f0f64a8b2a0
+0x7f0f6513db00 <_ZTV13instanceKlass+576>:	0x00007f0f64a7e4a0	0x00007f0f64a8b0a0
+0x7f0f6513db10 <_ZTV13instanceKlass+592>:	0x00007f0f64a7e240	0x00007f0f64a8aea0
+0x7f0f6513db20 <_ZTV13instanceKlass+608>:	0x00007f0f64a7dfe0	0x00007f0f64a8aca0
+0x7f0f6513db30 <_ZTV13instanceKlass+624>:	0x00007f0f64a7dd80	0x00007f0f64a8aaa0
+0x7f0f6513db40 <_ZTV13instanceKlass+640>:	0x00007f0f64a8ce80	0x00007f0f64a8a8a0
+0x7f0f6513db50 <_ZTV13instanceKlass+656>:	0x00007f0f64a8cbc0	0x00007f0f64a8a6a0
+0x7f0f6513db60 <_ZTV13instanceKlass+672>:	0x00007f0f64a8c920	0x00007f0f64a8a4d0
+0x7f0f6513db70 <_ZTV13instanceKlass+688>:	0x00007f0f64a8c0c0	0x00007f0f64a89d60
+0x7f0f6513db80 <_ZTV13instanceKlass+704>:	0x00007f0f64a80b40	0x00007f0f64a80910
+0x7f0f6513db90 <_ZTV13instanceKlass+720>:	0x00007f0f64a7fbc0	0x00007f0f64a7fa10
+0x7f0f6513dba0 <_ZTV13instanceKlass+736>:	0x00007f0f64a80f60	0x00007f0f64a80d30
+0x7f0f6513dbb0 <_ZTV13instanceKlass+752>:	0x00007f0f64a82670	0x00007f0f64a823a0
+0x7f0f6513dbc0 <_ZTV13instanceKlass+768>:	0x00007f0f64a7ecd0	0x00007f0f64a7eaa0
+0x7f0f6513dbd0 <_ZTV13instanceKlass+784>:	0x00007f0f64a7c8c0	0x00007f0f64a85d10
+0x7f0f6513dbe0 <_ZTV13instanceKlass+800>:	0x00007f0f64a85e30	0x00007f0f64a7e840
+
+disassemble 0x00007f0f64a8d4c0
+Dump of assembler code for function _ZN7oopDesc16size_given_klassEP5Klass:
+   0x00007f0f64a8d4c0 <+0>:	push   %rbp
+   0x00007f0f64a8d4c1 <+1>:	mov    0x8(%rsi),%eax
+   0x00007f0f64a8d4c4 <+4>:	mov    %rsi,%rdx
+   0x00007f0f64a8d4c7 <+7>:	mov    %rsp,%rbp
+   0x00007f0f64a8d4ca <+10>:	cmp    $0x0,%eax
+   0x00007f0f64a8d4cd <+13>:	jle    0x7f0f64a8d4d8 <_ZN7oopDesc16size_given_klassEP5Klass+24>
+   0x00007f0f64a8d4cf <+15>:	sar    $0x3,%eax
+   0x00007f0f64a8d4d2 <+18>:	leaveq 
+   0x00007f0f64a8d4d3 <+19>:	retq   
+   0x00007f0f64a8d4d4 <+20>:	nopl   0x0(%rax)
+   0x00007f0f64a8d4d8 <+24>:	jne    0x7f0f64a8d4f0 <_ZN7oopDesc16size_given_klassEP5Klass+48>
+   0x00007f0f64a8d4da <+26>:	mov    (%rsi),%rax
+   0x00007f0f64a8d4dd <+29>:	mov    %rdi,%rsi
+   0x00007f0f64a8d4e0 <+32>:	mov    %rdx,%rdi
+   0x00007f0f64a8d4e3 <+35>:	mov    0xa0(%rax),%rax
+   0x00007f0f64a8d4ea <+42>:	leaveq 
+   0x00007f0f64a8d4eb <+43>:	jmpq   *%rax
+   0x00007f0f64a8d4ed <+45>:	nopl   (%rax)
+   0x00007f0f64a8d4f0 <+48>:	mov    0x6c15b1(%rip),%rdx        # 0x7f0f6514eaa8
+   0x00007f0f64a8d4f7 <+55>:	mov    %eax,%esi
+   0x00007f0f64a8d4f9 <+57>:	mov    %eax,%ecx
+   0x00007f0f64a8d4fb <+59>:	cmpb   $0x1,(%rdx)
+   0x00007f0f64a8d4fe <+62>:	sbb    %rdx,%rdx
+   0x00007f0f64a8d501 <+65>:	sar    $0x10,%esi
+   0x00007f0f64a8d504 <+68>:	and    $0x3f,%ecx
+   0x00007f0f64a8d507 <+71>:	and    $0x4,%edx
+   0x00007f0f64a8d50a <+74>:	movzbl %sil,%esi
+   0x00007f0f64a8d50e <+78>:	movslq 0xc(%rdi,%rdx,1),%rdx
+   0x00007f0f64a8d513 <+83>:	leaveq 
+   0x00007f0f64a8d514 <+84>:	shl    %cl,%rdx
+   0x00007f0f64a8d517 <+87>:	lea    0x7(%rsi,%rdx,1),%rax
+   0x00007f0f64a8d51c <+92>:	shr    $0x3,%rax
+   0x00007f0f64a8d520 <+96>:	retq   
+End of assembler dump.
+
