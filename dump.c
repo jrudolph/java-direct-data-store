@@ -147,7 +147,7 @@ JNIEXPORT jobject JNICALL Java_Test_load
   return ret;
 }
 
-typedef void(*Iterator)(oop,long);
+typedef void(*Iterator)(oop,oop,int,long);
 
 int is_oop(void *ptr)
 {
@@ -183,7 +183,7 @@ void iterate_over_fields(oop root, void *arg, Iterator it)
     iterate_over_oop_array(root, arg, it);
     return;
   }
-  it(root, arg);
+  it(root, 0, 0, arg);
   
   void **end = ((void*)root) + size;
   
@@ -192,7 +192,7 @@ void iterate_over_fields(oop root, void *arg, Iterator it)
     printf("Now at %lx\n", cur);
   
     if (is_oop(*cur)) {
-      it(*cur, arg);
+      it(*cur, root, (void*)cur - (void*)root, arg);
       iterate_over_fields(*cur, arg, it);
     }
     cur += 1;
@@ -216,7 +216,7 @@ void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
   for (i = 0; i < size; i++) {
     oop *ele = array->data + (i << info->element_size);
     printf("Element %d 0x%lx data=0x%lx\n", i, *ele, array->data);
-    it(*ele, arg);
+    it(*ele, array, (void*)ele - (void*)array, arg);
   }  
 }
 
@@ -255,15 +255,16 @@ void print_oop(oop o,void *l)
     internal_name(o->klass));
 }
 
-void print_and_relocate_oop(oop o,pState p)
+void print_and_relocate_oop(oop o, oop parent, int offset, pState p)
 {
-  printf("--- Found object: 0x%lx size=%d classSize=%d class=%s\n", 
-    o,
-    sizeOf(o),
-    sizeOf(o->klass),
-    internal_name(o->klass));
+  print_oop(o, p);
     
-  relocate(o, p);
+  oop new = relocate(o, p);
+  if (parent) {
+    // plugin the holes in the parent
+    oop *newHole = ((void*)find(p->relocated_oops, parent)) + offset;
+    *newHole = new;
+  }
 }
 
 JNIEXPORT void JNICALL Java_Test_analyze
