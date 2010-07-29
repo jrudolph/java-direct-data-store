@@ -7,17 +7,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-JNIEXPORT jobject JNICALL Java_Test_get
-(JNIEnv *env, jclass cl)
-{
-  printf("Wurstbombe\n");
-  return 0;
-}
-
 struct oopDesc;
 struct klassOopDesc;
+struct oopArrayOopDesc;
 typedef struct oopDesc* oop;
 typedef struct klassOopDesc* klassOop;
+typedef struct oopArrayOopDesc* oopArrayOop;
 
 struct oopDesc {
   void *header;
@@ -30,6 +25,12 @@ struct klassOopDesc {
   void **vtable;
   int  layout_helper;
   int  super_check_offset;
+};
+
+struct oopArrayOopDesc {
+  struct oopDesc oop;
+  long length;
+  char data[];
 };
 
 struct Format {
@@ -45,7 +46,7 @@ void assert(int cond, char *msg)
   if (!cond) printf("Assertion failed: %s\n", msg);
 }
 
-int sizeOfInstance(oop o)
+int size_of_instance(oop o)
 {
   int size = o->klass->layout_helper;
   assert(size != 0, "Not an instance");
@@ -132,16 +133,37 @@ int is_oop(void *ptr)
   return ptr > 0x7f0000000000;
 }
 
-void iterate_over_fields(oop root, long arg, Iterator it)
+struct ArrayInfo {
+  unsigned char element_size;
+  unsigned char type;
+  unsigned char offset;
+  unsigned char tag;  
+};
+#define ARRAY_TAG_MASK 0xff000000
+#define OOPS_ARRAY 0x80000000
+// see klass.hpp for explanation of layout_helper field
+int is_oop_array(oop o)
+{
+  return (size_of_instance(o) & ARRAY_TAG_MASK) == OOPS_ARRAY;
+}
+
+void iterate_over_fields(oop root, void *arg, Iterator it)
 {
   printf("Iterating over 0x%lx\n", root);
 
-  int size = sizeOfInstance(root);
+  int size = size_of_instance(root);
   if (size == 0) {
     printf("Not an instance: 0x%lx", root);
     return;
   }
-    
+  else if (is_oop_array(root))
+  {
+    printf("Found array: 0x%lx\n", root);
+    iterate_over_oop_array(root, arg, it);
+    return;
+  }
+  it(root, arg);
+  
   void **end = ((void*)root) + size;
   
   void **cur = root->data;
@@ -156,15 +178,33 @@ void iterate_over_fields(oop root, long arg, Iterator it)
   }
 }
 
-void print_oop(oop o,long l)
+void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
 {
-  printf("Found object: 0x%lx\n", o);
+  struct ArrayInfo *info = &array->oop.klass->layout_helper;
+  dump(array, 100);
+  printf("ArrayInfo: tag=0x%x offset=%d type=%d element_size=%d\n",
+    info->tag,
+    info->offset,
+    info->type,
+    info->element_size);
+  
+  int size = array->length;
+  int i;
+  for (i = 0; i < size; i++) {
+    oop *ele = array->data + (i << info->element_size);
+    printf("Element %d 0x%lx data=0x%lx\n", i, *ele, array->data);
+    it(*ele, arg);
+  }  
+}
+
+void print_oop(oop o,void *l)
+{
+  printf("--- Found object: 0x%lx\n", o);
 }
 
 JNIEXPORT void JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
 {
   oop *myO = o;
-  dump(*myO, 100);
   iterate_over_fields(*myO, 0, print_oop);
 }

@@ -3,7 +3,6 @@ public class Test {
     System.loadLibrary("test");
   }
 
-  public static native Person get();
   public static native Person persist(Person p);
   public static native Person load(Class<Person> cl);
   public static native void analyze(Person p);
@@ -30,7 +29,7 @@ public class Test {
     
     Person p = new Person();
     p.age = 26;
-    p.parent = mom;
+    p.parents = new Person[]{ mom };
     analyze(p);
   }
   public static void main(String[] args) throws InterruptedException {
