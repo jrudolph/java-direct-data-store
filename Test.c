@@ -41,6 +41,8 @@ struct Format {
 
 typedef struct Format *Formatp;
 
+#define KLASS_OOP_SIZE_IDX 0x14
+
 void assert(int cond, char *msg)
 {
   if (!cond) printf("Assertion failed: %s\n", msg);
@@ -63,8 +65,8 @@ void dump(void *buffer, int size)
 int sizeOf(oop o) 
 {
   klassOop k = o->klass;
-  int(*method)(void*,oop) = k->vtable[0xa0];
-  return method(&k->layout_helper, o);
+  int(*method)(void*,oop) = k->vtable[KLASS_OOP_SIZE_IDX];
+  return method(&k->vtable, o);
 }
 
 klassOop *unwrap_java_class(jclass clazz)
