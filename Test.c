@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <openssl/lhash.h>
 
 struct oopDesc;
 struct klassOopDesc;
@@ -40,6 +41,13 @@ struct oopArrayOopDesc {
   struct oopDesc oop;
   long length;
   char data[];
+};
+
+struct ClassInfo {
+  struct ClassInfo *next;
+  long name_length;
+  char name[/*name_length*/];
+  // char data[];
 };
 
 struct Format {
@@ -89,6 +97,10 @@ klassOop *unwrap_java_class(jclass clazz)
   return ((void*)*javaKlassOop) + sizeof(struct oopDesc);
 }
 
+klassOop klass_by_name(JNIEnv *env, char *name)
+{
+  return *unwrap_java_class((*env)->FindClass(env, name));
+}
 
 JNIEXPORT jobject JNICALL Java_Test_persist
   (JNIEnv *env, jclass cl, jobject o)
@@ -215,6 +227,85 @@ void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
   }  
 }
 
+typedef LHASH *HashTable;
+
+struct RelocEntry {
+  oop old;
+  oop new;
+};
+
+typedef struct RelocEntry *Entry;
+
+unsigned long RelocEntry_hash(const Entry tohash)
+{
+  return tohash->old;
+}
+
+int RelocEntry_cmp(const Entry arg1, const Entry arg2)
+{
+    return arg1->old - arg2->old;
+}
+
+IMPLEMENT_LHASH_HASH_FN(RelocEntry_hash, const Entry)
+IMPLEMENT_LHASH_COMP_FN(RelocEntry_cmp, const Entry);
+
+HashTable create_hash_table()
+{
+  return lh_new(LHASH_HASH_FN(RelocEntry_hash),
+                LHASH_COMP_FN(RelocEntry_cmp));
+}
+
+void free_hash_table(HashTable t)
+{
+  // TODO: free all entries
+  lh_free(t);
+}
+
+struct RelocationState {
+  HashTable relocated_oops;
+  HashTable relocated_classes;
+  void *oops_pos;
+  void *class_pos;
+};
+typedef struct RelocationState *pState;
+
+void put(HashTable table, oop old, oop new)
+{
+  Entry e = malloc(sizeof(struct RelocEntry));
+  e->old = old;
+  e->new = new;
+  lh_insert(table, e);
+}
+
+Entry find(HashTable table, oop old)
+{
+  struct RelocEntry e;
+  e.old = old;
+  Entry res = lh_retrieve(table, &e);
+  if (res)
+    return res->new;
+  else
+    return 0;
+}
+
+oop relocate(oop o, pState relocator)
+{
+  oop reloc = find(relocator->relocated_oops, o);
+  if (!reloc) { // not yet relocated
+    int size = sizeOf(o) << 3;
+    reloc = relocator->oops_pos;
+    memcpy(reloc, o, size);
+    relocator->oops_pos += size;
+    
+    printf("Relocating 0x%lx to 0x%lx\n", o, reloc);    
+    put(relocator->relocated_oops, o, reloc);
+  }
+  else {
+    printf("Already relocated: 0x%lx to 0x%lx\n", o, reloc);
+  }
+  return reloc;
+}
+
 void print_oop(oop o,void *l)
 {
   printf("--- Found object: 0x%lx size=%d classSize=%d class=%s\n", 
@@ -224,9 +315,31 @@ void print_oop(oop o,void *l)
     internal_name(o->klass));
 }
 
+void print_and_relocate_oop(oop o,pState p)
+{
+  printf("--- Found object: 0x%lx size=%d classSize=%d class=%s\n", 
+    o,
+    sizeOf(o),
+    sizeOf(o->klass),
+    internal_name(o->klass));
+    
+  relocate(o, p);
+}
+
 JNIEXPORT void JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
 {
+  struct RelocationState state;
+  state.relocated_oops = create_hash_table();
+  void *buffer = malloc(10000);
+  state.oops_pos = buffer;
+  
+  printf("Starting to relocate to 0x%lx\n", buffer);
+
   oop *myO = o;
-  iterate_over_fields(*myO, env, print_oop);
+  iterate_over_fields(*myO, &state, print_and_relocate_oop);
+  free_hash_table(state.relocated_oops);
+  
+  dump(buffer, 1000);
+  free(buffer);
 }
