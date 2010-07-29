@@ -10,9 +10,11 @@
 struct oopDesc;
 struct klassOopDesc;
 struct oopArrayOopDesc;
+struct KlassVtbl;
 typedef struct oopDesc* oop;
 typedef struct klassOopDesc* klassOop;
 typedef struct oopArrayOopDesc* oopArrayOop;
+typedef struct KlassVtbl* pKlass;
 
 struct oopDesc {
   void *header;
@@ -20,9 +22,16 @@ struct oopDesc {
   char data[];
 };
 
+struct KlassVtbl {
+  void *reserved[20];
+  int(*oop_size)(pKlass*,oop);    // 0x14
+  void *reserved2[96];
+  char*(*internal_name)(pKlass*); // 117
+};
+
 struct klassOopDesc {
   struct oopDesc oop;
-  void **vtable;
+  pKlass vtbl;
   int  layout_helper;
   int  super_check_offset;
 };
@@ -40,8 +49,6 @@ struct Format {
 };
 
 typedef struct Format *Formatp;
-
-#define KLASS_OOP_SIZE_IDX 0x14
 
 void assert(int cond, char *msg)
 {
@@ -64,9 +71,16 @@ void dump(void *buffer, int size)
 
 int sizeOf(oop o) 
 {
-  klassOop k = o->klass;
-  int(*method)(void*,oop) = k->vtable[KLASS_OOP_SIZE_IDX];
-  return method(&k->vtable, o);
+  pKlass *kl = &o->klass->vtbl;
+  int ret = (*kl)->oop_size(kl, o);
+  //printf("SizeOf: %d SizeOf2: %d\n", ret, sizeOf2(o));
+  return ret;
+}
+
+char *internal_name(klassOop klass)
+{
+  pKlass *kl = &klass->vtbl;
+  return (*kl)->internal_name(kl);
 }
 
 klassOop *unwrap_java_class(jclass clazz)
@@ -203,12 +217,16 @@ void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
 
 void print_oop(oop o,void *l)
 {
-  printf("--- Found object: 0x%lx size=%d\n", o, sizeOf(o));
+  printf("--- Found object: 0x%lx size=%d classSize=%d class=%s\n", 
+    o,
+    sizeOf(o),
+    sizeOf(o->klass),
+    internal_name(o->klass));
 }
 
 JNIEXPORT void JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
 {
   oop *myO = o;
-  iterate_over_fields(*myO, 0, print_oop);
+  iterate_over_fields(*myO, env, print_oop);
 }
