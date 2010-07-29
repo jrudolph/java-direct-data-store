@@ -228,6 +228,44 @@ struct RelocationState {
 };
 typedef struct RelocationState *pState;
 
+void* align(void *p)
+{
+  void *aligned = ((long)p & 0xfffffffffffffff8);
+  if (p == aligned)
+    return p;
+  else
+    return aligned + 8;
+}
+
+oop relocateKlass(klassOop kl, pState p)
+{
+  oop res = find(p->relocated_classes, kl);
+  
+  if (!res) {
+    struct ClassInfo *next = p->class_pos;
+    
+    char *name = internal_name(kl);
+    int length = strlen(name);
+    next->name_length = length;
+    memcpy(next->name, name, length);
+
+    res = &next->name[length];
+    int oop_size = sizeOf(kl);
+    memcpy(res, kl, oop_size);
+    
+    next->next = align((void*)next + sizeof(struct ClassInfo) + length + oop_size);
+    p->class_pos = next->next;
+    
+    put(p->relocated_classes, kl, res);
+    
+    printf("Relocating class 0x%lx to 0x%lx %s name_length: %d size: %d\n", kl, res, name, length, oop_size);
+  }
+  else {
+    printf("Already relocated class at 0x%lx to 0x%lx %s\n", kl, res, internal_name(kl));
+  }
+  return res;
+}
+
 oop relocate(oop o, pState relocator)
 {
   oop reloc = find(relocator->relocated_oops, o);
@@ -236,6 +274,8 @@ oop relocate(oop o, pState relocator)
     reloc = relocator->oops_pos;
     memcpy(reloc, o, size);
     relocator->oops_pos += size;
+    
+    reloc->klass = relocateKlass(reloc->klass, relocator);
     
     printf("Relocating 0x%lx to 0x%lx\n", o, reloc);    
     put(relocator->relocated_oops, o, reloc);
@@ -279,6 +319,7 @@ JNIEXPORT void JNICALL Java_Test_analyze
 
   struct RelocationState state;
   state.relocated_oops = create_hash_table();
+  state.relocated_classes = create_hash_table();
   state.oops_pos = data->data;
   state.class_pos = data->header;
   
