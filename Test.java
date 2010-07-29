@@ -29,7 +29,7 @@ public class Test {
     
     Person p = new Person();
     p.age = 26;
-    p.parents = new Person[]{ mom };
+    p.parents = new Person[]{ mom, mom, mom };
     analyze(p);
   }
   public static void main(String[] args) throws InterruptedException {

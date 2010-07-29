@@ -184,13 +184,15 @@ void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
 {
   struct ArrayInfo *info = &array->oop.klass->layout_helper;
   dump(array, 100);
-  printf("ArrayInfo: tag=0x%x offset=%d type=%d element_size=%d\n",
+  printf("Static ArrayInfo: tag=0x%x offset=%d type=%d element_size=%d\n",
     info->tag,
     info->offset,
     info->type,
     info->element_size);
-  
+    
   int size = array->length;
+  printf("Array length: %d\n", size);
+  
   int i;
   for (i = 0; i < size; i++) {
     oop *ele = array->data + (i << info->element_size);
@@ -201,7 +203,7 @@ void iterate_over_oop_array(oopArrayOop array, void *arg, Iterator it)
 
 void print_oop(oop o,void *l)
 {
-  printf("--- Found object: 0x%lx\n", o);
+  printf("--- Found object: 0x%lx size=%d\n", o, sizeOf(o));
 }
 
 JNIEXPORT void JNICALL Java_Test_analyze
