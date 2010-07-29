@@ -22,6 +22,7 @@ typedef struct klassOopDesc* klassOop;
 struct oopDesc {
   void *header;
   klassOop  klass;
+  char data[];
 };
 
 struct klassOopDesc {
@@ -38,6 +39,18 @@ struct Format {
 };
 
 typedef struct Format *Formatp;
+
+void assert(int cond, char *msg)
+{
+  if (!cond) printf("Assertion failed: %s\n", msg);
+}
+
+int sizeOfInstance(oop o)
+{
+  int size = o->klass->layout_helper;
+  assert(size != 0, "Not an instance");
+  return size;
+}
 
 void dump(void *buffer, int size)
 {
@@ -101,7 +114,7 @@ JNIEXPORT jobject JNICALL Java_Test_load
   int f = open("bla", O_RDONLY);
   long pos;
   int res = read(f, &pos, sizeof(long));
-  printf("Read returned %d\n", res);
+  printf("Read returned %d\n", sizeof(void*));
   Formatp data = mmap(pos, page, PROT_READ|PROT_WRITE, MAP_PRIVATE, f, 0);
   printf("after mmap buffer: %lx\n", data);
   
@@ -110,4 +123,48 @@ JNIEXPORT jobject JNICALL Java_Test_load
   void** ret = (void**) (*env)->NewLocalRef(env, data->data);
   *ret = data->data;
   return ret;
+}
+
+typedef void(*Iterator)(oop,long);
+
+int is_oop(void *ptr)
+{
+  return ptr > 0x7f0000000000;
+}
+
+void iterate_over_fields(oop root, long arg, Iterator it)
+{
+  printf("Iterating over 0x%lx\n", root);
+
+  int size = sizeOfInstance(root);
+  if (size == 0) {
+    printf("Not an instance: 0x%lx", root);
+    return;
+  }
+    
+  void **end = ((void*)root) + size;
+  
+  void **cur = root->data;
+  while (cur < end) {
+    printf("Now at %lx\n", cur);
+  
+    if (is_oop(*cur)) {
+      it(*cur, arg);
+      iterate_over_fields(*cur, arg, it);
+    }
+    cur += 1;
+  }
+}
+
+void print_oop(oop o,long l)
+{
+  printf("Found object: 0x%lx\n", o);
+}
+
+JNIEXPORT void JNICALL Java_Test_analyze
+  (JNIEnv *env, jclass clazz, jobject o)
+{
+  oop *myO = o;
+  dump(*myO, 100);
+  iterate_over_fields(*myO, 0, print_oop);
 }

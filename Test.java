@@ -6,6 +6,7 @@ public class Test {
   public static native Person get();
   public static native Person persist(Person p);
   public static native Person load(Class<Person> cl);
+  public static native void analyze(Person p);
   
   public static void pers() {
     Person p = new Person();
@@ -23,9 +24,19 @@ public class Test {
     System.out.println(copy.age);
   }
   
+  public static void analyze() {
+    Person mom = new Person();
+    mom.age = 52;
+    
+    Person p = new Person();
+    p.age = 26;
+    p.parent = mom;
+    analyze(p);
+  }
   public static void main(String[] args) throws InterruptedException {
     //Thread.sleep(20000);
     //pers();
-    load();
+    //load();
+    analyze();
   }
 }
