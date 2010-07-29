@@ -267,20 +267,26 @@ void print_and_relocate_oop(oop o, oop parent, int offset, pState p)
   }
 }
 
+#define FILE_SIZE 50000
+
 JNIEXPORT void JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
 {
+  int f = open("bla", O_RDWR);
+  printf("after creat page: %ld file: %d\n", FILE_SIZE, f);
+  Formatp data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, f, 0);
+  data->base = data;
+
   struct RelocationState state;
   state.relocated_oops = create_hash_table();
-  void *buffer = malloc(10000);
-  state.oops_pos = buffer;
+  state.oops_pos = data->data;
+  state.class_pos = data->header;
   
-  printf("Starting to relocate to 0x%lx\n", buffer);
+  printf("Starting to relocate to 0x%lx\n", state.oops_pos);
 
   oop *myO = o;
   iterate_over_fields(*myO, &state, print_and_relocate_oop);
-  free_hash_table(state.relocated_oops);
+  msync(data, FILE_SIZE, MS_SYNC);
   
-  dump(buffer, 1000);
-  free(buffer);
+  free_hash_table(state.relocated_oops);
 }
