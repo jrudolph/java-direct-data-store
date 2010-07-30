@@ -139,6 +139,16 @@ JNIEXPORT jobject JNICALL Java_Test_persist
   return o;
 }
 
+/* 
+ * Try to find a reasonable address in the complete
+ * address range to map the file.
+ */
+void *initial_address(jobject o)
+{
+  long ptr = *((oop *) o);
+  return 0x7f1000000000;//(ptr & 0x7fff00000000) - 0x100000000;
+}
+
 typedef void(*Iterator)(oop,oop,int,long);
 
 int is_oop(void *ptr)
@@ -318,7 +328,7 @@ JNIEXPORT jobject JNICALL Java_Test_analyze
 {
   int f = open("bla", O_RDWR);
   printf("after creat page: %ld file: %d\n", FILE_SIZE, f);
-  Formatp data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, f, 0);
+  Formatp data = mmap(initial_address(o), FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, f, 0);
   data->base = data;
 
   struct RelocationState state;
