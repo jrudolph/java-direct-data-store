@@ -1,4 +1,5 @@
 public class Person {
   int age;
-  Person[] parents;
+  String name;
+  java.util.List<Person> parents;
 }
