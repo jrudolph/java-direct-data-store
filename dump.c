@@ -93,7 +93,9 @@ klassOop *unwrap_java_class(jclass clazz)
 
 klassOop klass_by_name(JNIEnv *env, char *name)
 {
-  return *unwrap_java_class((*env)->FindClass(env, name));
+  jclass clazz = (*env)->FindClass(env, name);
+  assert(clazz != 0, name);
+  return *unwrap_java_class(clazz);
 }
 
 JNIEXPORT jobject JNICALL Java_Test_persist
