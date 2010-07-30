@@ -38,9 +38,10 @@ struct oopArrayOopDesc {
 
 struct ClassInfo {
   struct ClassInfo *next;
-  long name_length;
-  char name[/*name_length*/];
-  // char data[];
+  long klass_length;
+  char data[/*klass_length*/];
+  // char name[];
+  // alignment
 };
 
 struct Format {
@@ -244,16 +245,19 @@ oop relocateKlass(klassOop kl, pState p)
   if (!res) {
     struct ClassInfo *next = p->class_pos;
     
-    char *name = internal_name(kl);
-    int length = strlen(name);
-    next->name_length = length;
-    memcpy(next->name, name, length);
-
-    res = &next->name[length];
+    res = &next->data;
     int oop_size = sizeOf(kl);
     memcpy(res, kl, oop_size);
+    next->klass_length = oop_size;
     
-    next->next = align((void*)next + sizeof(struct ClassInfo) + length + oop_size);
+    char *name = internal_name(kl);
+    int length = strlen(name);
+    
+    char *name_ptr = &next->data[oop_size];
+
+    strcpy(name_ptr, name);
+        
+    next->next = align(name_ptr + length + 1);
     p->class_pos = next->next;
     
     put(p->relocated_classes, kl, res);
