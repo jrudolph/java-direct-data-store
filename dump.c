@@ -327,7 +327,7 @@ void print_and_relocate_oop(oop o, oop parent, int offset, pState p)
 
 #define FILE_SIZE 50000
 
-JNIEXPORT void JNICALL Java_Test_analyze
+JNIEXPORT jobject JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
 {
   int f = open("bla", O_RDWR);
@@ -348,4 +348,9 @@ JNIEXPORT void JNICALL Java_Test_analyze
   msync(data, FILE_SIZE, MS_SYNC);
   
   free_hash_table(state.relocated_oops);
+  free_hash_table(state.relocated_classes);
+  
+  void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
+  *ret = &data->data;
+  return ret;
 }

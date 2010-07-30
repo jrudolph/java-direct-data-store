@@ -5,7 +5,7 @@ public class Test {
 
   public static native Person persist(Person p);
   public static native Person load(Class<Person> cl);
-  public static native void analyze(Person p);
+  public static native <T> T analyze(T t);
   
   public static void pers() {
     Person p = new Person();
