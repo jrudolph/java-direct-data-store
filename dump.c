@@ -184,7 +184,6 @@ void iterate_over_fields(oop root, void *arg, Iterator it)
     iterate_over_oop_array(root, arg, it);
     return;
   }
-  it(root, 0, 0, arg);
   
   void **end = ((void*)root) + size;
   
@@ -194,7 +193,6 @@ void iterate_over_fields(oop root, void *arg, Iterator it)
   
     if (is_oop(*cur)) {
       it(*cur, root, (void*)cur - (void*)root, arg);
-      iterate_over_fields(*cur, arg, it);
     }
     cur += 1;
   }
@@ -270,6 +268,8 @@ oop relocateKlass(klassOop kl, pState p)
   return res;
 }
 
+void print_and_relocate_oop(oop o, oop parent, int offset, pState p);
+
 oop relocate(oop o, pState relocator)
 {
   oop reloc = find(relocator->relocated_oops, o);
@@ -283,6 +283,8 @@ oop relocate(oop o, pState relocator)
     
     printf("Relocating 0x%lx to 0x%lx\n", o, reloc);    
     put(relocator->relocated_oops, o, reloc);
+    
+    iterate_over_fields(o, relocator, print_and_relocate_oop);
   }
   else {
     printf("Already relocated: 0x%lx to 0x%lx\n", o, reloc);
@@ -330,7 +332,7 @@ JNIEXPORT void JNICALL Java_Test_analyze
   printf("Starting to relocate to 0x%lx\n", state.oops_pos);
 
   oop *myO = o;
-  iterate_over_fields(*myO, &state, print_and_relocate_oop);
+  print_and_relocate_oop(*myO, 0, 0, &state);
   msync(data, FILE_SIZE, MS_SYNC);
   
   free_hash_table(state.relocated_oops);
