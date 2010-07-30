@@ -139,25 +139,6 @@ JNIEXPORT jobject JNICALL Java_Test_persist
   return o;
 }
 
-JNIEXPORT jobject JNICALL Java_Test_load
-  (JNIEnv *env, jclass recv, jclass inClass)
-{
-  long page = sysconf(_SC_PAGE_SIZE);
-
-  int f = open("bla", O_RDONLY);
-  long pos;
-  int res = read(f, &pos, sizeof(long));
-  printf("Read returned %d\n", sizeof(void*));
-  Formatp data = mmap(pos, page, PROT_READ|PROT_WRITE, MAP_PRIVATE, f, 0);
-  printf("after mmap buffer: %lx\n", data);
-  
-  memcpy(data->header, *unwrap_java_class(inClass), 500);
-  
-  void** ret = (void**) (*env)->NewLocalRef(env, data->data);
-  *ret = data->data;
-  return ret;
-}
-
 typedef void(*Iterator)(oop,oop,int,long);
 
 int is_oop(void *ptr)
@@ -350,6 +331,35 @@ JNIEXPORT jobject JNICALL Java_Test_analyze
   free_hash_table(state.relocated_oops);
   free_hash_table(state.relocated_classes);
   
+  void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
+  *ret = &data->data;
+  return ret;
+}
+
+JNIEXPORT jobject JNICALL Java_Test_load
+  (JNIEnv *env, jclass recv, jclass inClass)
+{
+  long page = sysconf(_SC_PAGE_SIZE);
+
+  int f = open("bla", O_RDONLY);
+  long pos;
+  int res = read(f, &pos, sizeof(long));
+  printf("Read returned %d\n", sizeof(void*));
+  Formatp data = mmap(pos, page, PROT_READ|PROT_WRITE, MAP_PRIVATE, f, 0);
+  printf("after mmap buffer: %lx == %lx\n", data, pos);
+
+  // reload class information
+  struct ClassInfo *info = &data->header;
+  while(info->next) {
+    char *name = info->data + info->klass_length;
+    printf("Searching for class %-30s ... ", name);
+    klassOop kl = klass_by_name(env, name);
+    printf("Found class our size %3d their size %3d name %s\n", info->klass_length, sizeOf(kl), external_name(kl));
+    memcpy(info->data, kl, info->klass_length);
+    info = info->next;
+  }
+  dump(data, 50000);
+
   void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
   *ret = &data->data;
   return ret;
