@@ -342,6 +342,7 @@ JNIEXPORT jobject JNICALL Java_Test_analyze
   oop *myO = o;
   print_and_relocate_oop(*myO, 0, 0, &state);
   msync(data, FILE_SIZE, MS_SYNC);
+  dump(data, FILE_SIZE);
   
   free_hash_table(state.relocated_oops);
   free_hash_table(state.relocated_classes);
@@ -375,9 +376,23 @@ JNIEXPORT jobject JNICALL Java_Test_load
   }
   int err = mprotect(pos, FILE_SIZE, PROT_READ);
   printf("Marked region read-only returned %d\n", err);
-  dump(data, 50000);
+  dump(data, FILE_SIZE);
+  printf("Returning root object at 0x%lx\n", &data->data);
 
   void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
   *ret = &data->data;
   return ret;
+}
+
+JNIEXPORT void JNICALL Java_Test_showPointer
+  (JNIEnv *env, jclass clazz, jobject o)
+{
+  printf("Pointer: 0x%lx\n", *((oop*)o));
+}
+
+JNIEXPORT void JNICALL Java_Test_loadInto
+  (JNIEnv *env, jclass clazz, jobjectArray oa)
+{
+  jobject res = Java_Test_load(env, clazz, 0);
+  (*env)->SetObjectArrayElement(env, oa, 0, res);
 }
