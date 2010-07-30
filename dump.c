@@ -227,6 +227,11 @@ void* align(void *p)
     return aligned + 8;
 }
 
+char *name_offset(struct ClassInfo *info)
+{
+  return align(&info->data[info->klass_length]);
+}
+
 oop relocateKlass(klassOop kl, pState p)
 {
   oop res = find(p->relocated_classes, kl);
@@ -243,7 +248,7 @@ oop relocateKlass(klassOop kl, pState p)
     char *name = external_name(kl);
     int length = strlen(name);
     
-    char *name_ptr = &next->data[oop_size];
+    char *name_ptr = name_offset(next);
 
     strcpy(name_ptr, name);
         
@@ -351,7 +356,7 @@ JNIEXPORT jobject JNICALL Java_Test_load
   // reload class information
   struct ClassInfo *info = &data->header;
   while(info->next) {
-    char *name = info->data + info->klass_length;
+    char *name = name_offset(info);
     printf("Searching for class %-30s ... ", name);
     klassOop kl = klass_by_name(env, name);
     printf("Found class our size %3d their size %3d name %s\n", info->klass_length, sizeOf(kl), external_name(kl));
