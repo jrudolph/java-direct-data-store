@@ -48,7 +48,7 @@ struct ClassInfo {
 
 struct Format {
   long base;
-  char header[1000];
+  char header[100000];
   char data[];
 };
 
@@ -235,7 +235,7 @@ oop relocateKlass(klassOop kl, pState p)
     struct ClassInfo *next = p->class_pos;
     
     res = &next->data;
-    int oop_size = sizeOf(kl) + 160;
+    int oop_size = sizeOf(kl)<<3;
     printf("Class of kl: %s\n", internal_name(kl->oop.klass));
     memcpy(res, kl, oop_size);
     next->klass_length = oop_size;
@@ -306,7 +306,7 @@ void print_and_relocate_oop(oop o, oop parent, int offset, pState p)
   }
 }
 
-#define FILE_SIZE 50000
+#define FILE_SIZE 500000
 
 JNIEXPORT jobject JNICALL Java_Test_analyze
   (JNIEnv *env, jclass clazz, jobject o)
@@ -345,7 +345,7 @@ JNIEXPORT jobject JNICALL Java_Test_load
   long pos;
   int res = read(f, &pos, sizeof(long));
   printf("Read returned %d\n", sizeof(void*));
-  Formatp data = mmap(pos, page, PROT_READ|PROT_WRITE, MAP_PRIVATE, f, 0);
+  Formatp data = mmap(pos, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_PRIVATE, f, 0);
   printf("after mmap buffer: %lx == %lx\n", data, pos);
 
   // reload class information
