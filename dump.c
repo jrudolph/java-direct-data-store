@@ -363,6 +363,8 @@ JNIEXPORT jobject JNICALL Java_Test_load
     memcpy(info->data, kl, info->klass_length);
     info = info->next;
   }
+  int err = mprotect(pos, FILE_SIZE, PROT_READ);
+  printf("Marked region read-only returned %d\n", err);
   dump(data, 50000);
 
   void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
