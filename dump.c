@@ -19,7 +19,9 @@ struct oopDesc {
 struct KlassVtbl {
   void *reserved[20];
   int(*oop_size)(pKlass*,oop);    // 0x14
-  void *reserved2[96];
+  void *reserved2;
+  char*(*external_name)(pKlass*);
+  void *reserved3[94];
   char*(*internal_name)(pKlass*); // 117
 };
 
@@ -83,6 +85,12 @@ char *internal_name(klassOop klass)
 {
   pKlass *kl = &klass->vtbl;
   return (*kl)->internal_name(kl);
+}
+
+char *external_name(klassOop klass)
+{
+  pKlass *kl = &klass->vtbl;
+  return (*kl)->external_name(kl);
 }
 
 klassOop *unwrap_java_class(jclass clazz)
@@ -246,11 +254,12 @@ oop relocateKlass(klassOop kl, pState p)
     struct ClassInfo *next = p->class_pos;
     
     res = &next->data;
-    int oop_size = sizeOf(kl);
+    int oop_size = sizeOf(kl) + 160;
+    printf("Class of kl: %s\n", internal_name(kl->oop.klass));
     memcpy(res, kl, oop_size);
     next->klass_length = oop_size;
     
-    char *name = internal_name(kl);
+    char *name = external_name(kl);
     int length = strlen(name);
     
     char *name_ptr = &next->data[oop_size];
@@ -296,11 +305,12 @@ oop relocate(oop o, pState relocator)
 
 void print_oop(oop o,void *l)
 {
-  printf("--- Found object: 0x%lx size=%d classSize=%d class=%s\n", 
+  printf("--- Found object: 0x%lx size=%d classSize=%d class=%s ext=%s\n", 
     o,
     sizeOf(o),
     sizeOf(o->klass),
-    internal_name(o->klass));
+    internal_name(o->klass),
+    external_name(o->klass));
 }
 
 void print_and_relocate_oop(oop o, oop parent, int offset, pState p)
