@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class Test {
   static {
@@ -10,6 +11,7 @@ public class Test {
   public static native <T> T analyze(T t);
   public static native void showPointer(Object o);
   public static native void loadInto(Object[] o);
+  public static native void codeBlobCreation();
   
   public static void pers() {
     Person p = new Person();
@@ -20,15 +22,31 @@ public class Test {
     System.out.println(copy.age);
   }
   
+  public static void dumpPerson(Person copy) {
+    //System.out.println(copy.hashCode());
+    System.out.println(copy.age+" name: "+copy.name);
+    System.out.println(copy.parents.getClass().getSimpleName());
+    
+    Iterator<Person> it = copy.parents.iterator();
+    while(it.hasNext()) {
+      System.out.println("In the loop");
+      Person p = (Person) it.next();
+      System.out.println(p.name+" "+p.age);
+    }
+  }
   public static void load() {
     Person[] oa = new Person[1];
     loadInto(oa);
     Person copy = oa[0];
     showPointer(copy);
+    dumpPerson(copy);
+    System.out.println("Before gc: "+copy.age);
     System.gc();
     showPointer(copy);
+    System.out.println("Before gc: "+copy.age);
     System.gc();
     showPointer(copy);
+    System.out.println("Before gc: "+copy.age);
     System.gc();
     showPointer(copy);
     System.out.println(copy.age);
@@ -36,9 +54,7 @@ public class Test {
     System.out.println(copy.age+" cl: "+copy.getClass());
     System.gc();
     showPointer(copy);
-    System.out.println(copy.age+" name: "+copy.name);
-    for(Person p: copy.parents)
-      System.out.println(p.name+" "+p.age);
+    dumpPerson(copy);
   }
   
   public static void analyze() {
@@ -69,10 +85,19 @@ public class Test {
     System.gc();
     System.out.println(newS);*/
   }
+  public static void blobber(){
+    codeBlobCreation();
+    System.gc();
+    System.gc();
+    System.gc();
+    System.gc();
+  }
   public static void main(String[] args) throws InterruptedException {
     //Thread.sleep(20000);
     //pers();
     load();
     //analyze();
+    
+    //blobber();
   }
 }
