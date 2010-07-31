@@ -373,7 +373,7 @@ JNIEXPORT jobject JNICALL Java_Test_load
     char *name = name_offset(info);
     printf("Searching for class %-30s ... ", name);
     klassOop kl = klass_by_name(env, name);
-    printf("Found class our size %3d their size %3d name %s\n", info->klass_length, sizeOf(kl), external_name(kl));
+    printf("Found class our size %3d their size %3d name %s\n", info->klass_length, sizeOf(kl)<<3, external_name(kl));
     memcpy(info->data, kl, info->klass_length);
     info = info->next;
   }
