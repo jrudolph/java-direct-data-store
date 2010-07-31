@@ -355,6 +355,11 @@ JNIEXPORT jobject JNICALL Java_Test_analyze
   return ret;
 }
 
+long data_offset(Formatp file)
+{
+  return (void*)&file->data - (void*)file;
+}
+
 JNIEXPORT jobject JNICALL Java_Test_load
   (JNIEnv *env, jclass recv, jclass inClass)
 {
@@ -377,7 +382,8 @@ JNIEXPORT jobject JNICALL Java_Test_load
     memcpy(info->data, kl, info->klass_length);
     info = info->next;
   }
-  int err = mprotect(pos, FILE_SIZE, PROT_READ);
+  long offset = data_offset(data);
+  int err = mprotect(&data->data, FILE_SIZE-offset, PROT_READ);
   printf("Marked region read-only returned %d\n", err);
   dump(data, FILE_SIZE);
   printf("Returning root object at 0x%lx\n", &data->data);
