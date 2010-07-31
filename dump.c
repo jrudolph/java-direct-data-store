@@ -360,6 +360,21 @@ long data_offset(Formatp file)
   return (void*)&file->data - (void*)file;
 }
 
+int num_ptrs;
+oop *oop_ptrs[1000];
+
+void find_ptrs(oop *buf, int size)
+{
+  void *end = (char*)buf+size;
+  while(buf < end) {
+    if (is_oop(*buf) && is_oop((*buf)->klass) && (*buf)->header == 1) {
+      printf("Found oop: 0x%lx = 0x%lx class=%s\n", buf, *buf, internal_name(((oop)*buf)->klass));
+      oop_ptrs[num_ptrs++] = buf;
+    }
+    buf++;
+  }
+}
+
 JNIEXPORT jobject JNICALL Java_Test_load
   (JNIEnv *env, jclass recv, jclass inClass)
 {
@@ -380,13 +395,25 @@ JNIEXPORT jobject JNICALL Java_Test_load
     klassOop kl = klass_by_name(env, name);
     printf("Found class our size %3d their size %3d name %s\n", info->klass_length, sizeOf(kl)<<3, external_name(kl));
     memcpy(info->data, kl, info->klass_length);
+    
+    find_ptrs(info->data, info->klass_length);
+    
     info = info->next;
   }
+
   long offset = data_offset(data);
   int err = mprotect(&data->data, FILE_SIZE-offset, PROT_READ);
   printf("Marked region read-only returned %d\n", err);
   dump(data, FILE_SIZE);
   printf("Returning root object at 0x%lx\n", &data->data);
+  
+  // register ourselves in the JVM to take part
+  // in pointer adjustment, so that pointers to
+  // data inside of the mirrored klasses is updated
+  // if something moves during a GC.
+  Java_Test_codeBlobCreation(env, 0);
+  
+  dump(data, FILE_SIZE);
 
   void** ret = (void**) (*env)->NewLocalRef(env, &data->data);
   *ret = &data->data;
@@ -404,4 +431,36 @@ JNIEXPORT void JNICALL Java_Test_loadInto
 {
   jobject res = Java_Test_load(env, clazz, 0);
   (*env)->SetObjectArrayElement(env, oa, 0, res);
+}
+
+#define BLOB_CREATE_TO_NEW_LOCAL_REF (0x29ccf0-0x121502+34)
+
+void func(void *this, void*** closure)
+{
+  void (*do_oop)(void*, oop*) = (*closure)[0];
+  printf("In func this: 0x%lx closure: 0x%lx reporting %d oop*\n", this, closure, num_ptrs);
+  int i;
+  for(i = 0; i < num_ptrs; i++)
+    do_oop(closure, oop_ptrs[i]);
+}
+
+JNIEXPORT void JNICALL Java_Test_codeBlobCreation
+  (JNIEnv *env, jclass clazz)
+{
+  printf("Env->NewLocalRef points to 0x%lx\n", (*env)->NewLocalRef);
+  void *(*blob_create)(const char*, int) = (void*)(*env)->NewLocalRef - BLOB_CREATE_TO_NEW_LOCAL_REF;
+  printf("BufferBlob::create should be at 0x%lx\n", blob_create);
+  void ***blob = blob_create("test", 5);
+  printf("blob is 0x%lx ptr to oops_do is 0x%lx\n", blob, (*blob)[16]);
+  
+  // make a copy of the vtbl into malloc heap
+  int vtbl_size = 20*sizeof(void*);
+  void **ourVtbl = malloc(vtbl_size);
+  memcpy(ourVtbl, *blob, vtbl_size);
+
+  // patch vtable to our implementation of oops_do
+  ourVtbl[16] = func;
+  *blob = ourVtbl;
+
+  dump(*blob, 1000); 
 }
