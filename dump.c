@@ -10,6 +10,8 @@
 #include "dump.h"
 #include "reloc.h"
 
+#define MARKED 3
+
 struct oopDesc {
   void *header;
   klassOop  klass;
@@ -284,6 +286,7 @@ oop relocate(oop o, pState relocator)
     int size = sizeOf(o) << 3;
     reloc = relocator->oops_pos;
     memcpy(reloc, o, size);
+    reloc->header = MARKED;
     relocator->oops_pos += size;
     
     reloc->klass = relocateKlass(reloc->klass, relocator);
