@@ -155,7 +155,7 @@ typedef void(*Iterator)(oop,oop,int,long);
 
 int is_oop(void *ptr)
 {
-  return ptr > 0x7f0000000000;
+  return ((long)ptr & 0x7f0000000000) == 0x7f0000000000;
 }
 
 struct ArrayInfo {
